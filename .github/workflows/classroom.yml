@@ -1,0 +1,83 @@
+name: Simple shell calc
+on:
+  - push
+  - workflow_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  autograding:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: "1.25"
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Calculator Test Add
+        id: add-test
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Test Add
+          setup-command: go mod download
+          command: go test ./homework -run TestAdd -v
+          timeout: 10
+          max-score: 1
+
+      - name: Calculator Test Divide
+        id: div-test
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Test Divide
+          setup-command: go mod download
+          command: go test ./homework -run TestDivide -v
+          timeout: 10
+          max-score: 1
+
+      - name: Calculator Test Divide By Zero
+        id: div-by-zero-test
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Test Divide By Zero
+          setup-command: go mod download
+          command: go test ./homework -run TestDivide -v
+          timeout: 10
+          max-score: 2
+
+      - name: Calculator Test Subtract
+        id: sub-test
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Test Subtract
+          setup-command: go mod download
+          command: go test ./homework -run TestSubtract -v
+          timeout: 10
+          max-score: 1
+
+      - name: Calculator Test Multiply
+        id: mul-test
+        uses: classroom-resources/autograding-command-grader@v1
+        with:
+          test-name: Test Multiply
+          setup-command: go mod download
+          command: go test ./homework -run TestMultiply -v
+          timeout: 10
+          max-score: 1
+
+      - name: Autograding Reporter
+        uses: education/autograding-grading-reporter@v1
+        env:
+          ADD-TEST_RESULTS: "${{steps.add-test.outputs.result}}"
+          DIV-TEST_RESULTS: "${{steps.div-test.outputs.result}}"
+          DIV-BY-ZERO-TEST_RESULTS: "${{steps.div-by-zero-test.outputs.result}}"
+          SUB-TEST_RESULTS: "${{steps.sub-test.outputs.result}}"
+          MIL-AUTH-TEST_RESULTS: "${{steps.mul-test.outputs.result}}"
+        with:
+          runners: add-test,div-test,div-by-zero-test,sub-test,mul-test
